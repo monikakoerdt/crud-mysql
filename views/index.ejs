@@ -1,0 +1,79 @@
+<!--
+including header content which is common for all pages
+-->
+<%- include layouts/header.ejs %>    
+
+<html lang="en">
+<head>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="285255994377-cqf5eaf74jq3s6vj976n732dhq4mn0os.apps.googleusercontent.com">
+</head>
+<body>
+<style>
+    .profile{
+        border: 3px solid #B7B7B7;
+        padding: 10px;
+        margin-top: 10px;
+        width: 350px;
+        background-color: #F7F7F7;
+        height: 160px;
+    }
+    .profile p{margin: 0px 0px 10px 0px;}
+    .head{margin-bottom: 10px;}
+    .head a{float: right;}
+    .profile img{width: 100px;float: left;margin: 0px 10px 10px 0px;}
+    .proDetails{float: left;}
+</style>
+<script src="https://apis.google.com/js/client:platform.js?onload=renderButton" async defer></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    function onSuccess(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        var id_token = googleUser.getAuthResponse().id_token;
+        gapi.client.load('plus', 'v1', function () {
+            var request = gapi.client.plus.people.get({
+                'userId': 'me'
+            });
+            //Display the user details
+            request.execute(function (resp) {
+                var profileHTML = '<div class="profile"><div class="head">Welcome '+ profile.getName() +'! <a href="javascript:void(0);" onclick="signOut();">Sign out</a></div>';
+                profileHTML += '<img src="'+profile.getImageUrl()+'"/><div class="proDetails"><p>'+profile.getGivenName()+'</p><p>'+profile.getFamilyName()+'</p><p>'+profile.getEmail() +'</p><p>'+profile.getId()+'</p><p><a href="'+profile.getImageUrl()+'">View Google+ Profile</a></p></div></div>';
+                $('.userContent').html(profileHTML);
+                $('#gSignIn').slideUp('slow');
+            });
+        });
+    }
+    function onFailure(error) {
+        alert(error);
+    }
+    function renderButton() {
+        gapi.signin2.render('gSignIn', {
+            'scope': 'profile email',
+            'width': 540,
+            'height': 50,
+            'longtitle': true,
+            'theme': 'dark',
+            'onsuccess': onSuccess,
+            'onfailure': onFailure
+        });
+    }
+    function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+            $('.userContent').html('');
+            $('#gSignIn').slideDown('slow');
+        });
+    }
+</script>
+<!-- HTML for render Google Sign-In button -->
+<div id="gSignIn"></div>
+<!-- HTML for displaying user details -->
+<div class="userContent"></div>
+</body>
+
+</html>
+ 
+<!--
+including footer content which is common for all pages
+-->
+<%- include layouts/footer.ejs %>
